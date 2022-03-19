@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Add an atmospheric sky layer to a map</title>
+<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+<link href="https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.css" rel="stylesheet">
+<script src="https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.js"></script>
+<style>
+body { margin: 0; padding: 0; }
+#map { position: absolute; top: 0; bottom: 0; width: 100%; }
+</style>
+</head>
+<body>
+<style>
+    #inputs {
+        position: absolute;
+        top: 0;
+        left: 0;
+        padding: 10px;
+    }
+</style>
+
+<div id="map"></div>
+<div id="inputs">
+    <input type="button" id="sunriseEnd" value="sunrise">
+    <input type="button" id="goldenHourEnd" value="morning">
+    <input type="button" id="solarNoon" value="afternoon">
+    <input type="button" id="goldenHour" value="evening">
+    <input type="button" id="sunsetStart" value="sunset">
+    <input type="button" id="getlocal" value="local time">
+</div>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.8.0/suncalc.min.js"></script>
+
+<script>
+	mapboxgl.accessToken = 'pk.eyJ1IjoibHhsMTg2MTY3NjE1NzMiLCJhIjoiY2wwdGN2ZTd6MGtqMjNqcW9zYXV1eGY1byJ9.Fnj5nNbivkRLztpmRHL0MA';
+    const map = new mapboxgl.Map({
+        container: 'map',
+        zoom: 14.77,
+        center: [127.60597, 35.67283],
+        pitch: 83,
+        style: 'mapbox://styles/mapbox-map-design/ckhqrf2tz0dt119ny6azh975y'
+    });
+
+    // add a sky layer when the style has loaded
+    map.on('load', () => {
+        map.addSource('mapbox-dem', {
+            'type': 'raster-dem',
+            'url': 'mapbox://mapbox.mapbox-terrain-dem-v1',
+            'tileSize': 512,
+            'maxzoom': 14
+        });
+        map.setTerrain({ 'source': 'mapbox-dem', 'exaggeration': 1.5 });
+
+        map.addLayer({
+            'id': 'sky',
+            'type': 'sky',
+            'paint': {
+                'sky-opacity': [
+                    'interpolate',
+                    ['linear'],
+                    ['zoom'],
+                    0,
+                    0,
+                    5,
+                    0.3,
+                    8,
+                    1
+                ],
+                // set up the sky layer for atmospheric scattering
+                'sky-type': 'atmosphere',
+                // explicitly set the position of the sun rather than allowing the sun to be attached to the main light source
+                'sky-atmosphere-sun': getSunPosition(),
+                // set the intensity of the sun as a light source (0-100 with higher values corresponding to brighter skies)
+                'sky-atmosphere-sun-intensity': 5
+            }
+        });
+    });
+
+    // update the `sky-atmosphere-sun` paint property with the position of the sun based on the selected time
+    // the position of the sun is calculated using the SunCalc library
+    function updateSunPosition(sunPos) {
+        map.setPaintProperty('sky', 'sky-atmosphere-sun', sunPos);
+    }
+
+    // Get list of SunCalc's default sun positions
+    // for the current time and location
+    const sunPositions = SunCalc.getTimes(
+        Date.now(),
+        map.getCenter().lat,
+        map.getCenter().lng
+    );
+    // set up event listeners for the buttons to update
+    // the position of the sun for times of the day
+    const sunTimeLabels = document.querySelectorAll(
+        '#inputs input',
+        '#getlocal'
+    );
+    for (const label of sunTimeLabels) {
+        label.addEventListener('click', () => {
+            const sunPos =
+                label.id === 'getlocal'
+                    ? getSunPosition(new Date())
+                    : getSunPosition(sunPositions[label.id]);
+            updateSunPosition(sunPos);
+        });
+    }
+
+    function getSunPosition(date) {
+        const center = map.getCenter();
+        const sunPos = SunCalc.getPosition(
+            date || Date.now(),
+            center.lat,
+            center.lng
+        );
+        const sunAzimuth = 180 + (sunPos.azimuth * 180) / Math.PI;
+        const sunAltitude = 90 - (sunPos.altitude * 180) / Math.PI;
+        return [sunAzimuth, sunAltitude];
+    }
+</script>
+
+</body>
+</html>

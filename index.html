@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Display buildings in 3D</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1IjoibHhsMTg2MTY3NjE1NzMiLCJhIjoiY2wwdGN2ZTd6MGtqMjNqcW9zYXV1eGY1byJ9.Fnj5nNbivkRLztpmRHL0MA';
+        //    属性配置
+        const map = new mapboxgl.Map({
+            // style: './json/index.json', //高德地图
+            style: 'mapbox://styles/mapbox/outdoors-v10',
+            center: [104, 36],
+            zoom: 5,
+            pitch: 0, //倾斜角度
+            container: 'map',
+            hash: false, //保存浏览记录 如果为 true ，地图的位置 (包括缩放层级、中心纬度、中心经度、方位角和倾角) 将会与页面URL的哈希片段同步
+            interactive: true, //如果为 false ，地图将不会绑定对鼠标、触碰、键盘的监听，因此地图将不会响应任何用户交互。
+            bearingSnap: 7,//定义何时地图的方位将自动对齐到正北方向的阈值（以度为单位）。例如，当 bearingSnap 为 7 时，如果用户将地图转动到正北方向 7 度以内的范围时，地图将自动恢复对齐到正北方向。
+            pitchWithRotate: true, //如果为 false ，将不会在"拖拽进行地图旋转"的同时控制地图的倾斜。
+            clickTolerance: 1, //当用户点击地图时能进行鼠标移动的最大像素范围，点击地图后鼠标在此像素范围内移动则被认为是一次有效的点击(而不是拖拽)。
+            attributionControl: true, //如果为 true ， AttributionControl 将会被添加到地图上。
+            logoPosition: "bottom-right",
+            failIfMajorPerformanceCaveat: true, //如果为 true ，地图画布可通过 map.getCanvas().toDataURL() 输出 PNG 。出于性能优化考虑，该值默认为 false 
+            antialias: true, //如果为 true ，gl 渲染环境在创建时将开启多重采样抗锯齿模式（ MSAA ）, 这对自定义图层的抗锯齿十分有效。出于性能优化考虑，该值默认为 false 。
+            refreshExpiredTiles: false, //如果为 false ，一旦切片的 HTTP cacheControl / expires headers 过期，地图将不会重新请求这些切片。
+            // maxBounds:[[-73.9876, 40.7661], [-73.9397, 40.8002]], //地图将限制在给定的最大范围内
+            scrollZoom: true, //如果为 true ，将开启 "滚轮缩放地图" 交互模式。如果传值为 Object 对象，对象可选参数参考 ScrollZoomHandler#enable 。
+            boxZoom: true, //如果为 true , 将开启 "框选缩放地图" 交互模式 (查阅 BoxZoomHandler )。
+            dragRotate: true, //如果为 true , 将开启 "拖拽旋转地图" 交互模式 (查阅 DragRotateHandler )。
+        });
+        map.addControl(new mapboxgl.NavigationControl());
+        map.addControl(new mapboxgl.GeolocateControl({
+            positionOptions: {
+                enableHighAccuracy: true
+            },
+            trackUserLocation: true
+        }));
+        // map.addControl(new mapboxgl.AttributionControl({
+        //     compact: true
+        // }))
+        map.addControl(new mapboxgl.ScaleControl({
+            maxWidth: 80,
+            unit: 'imperial'
+        })) //显示刻度尺
+        map.addControl(new mapboxgl.FullscreenControl({ container: document.querySelector('body') }));
+
+
+        const popup = new mapboxgl.Popup({ closeOnClick: false })
+            .setLngLat([104, 36])
+            .setHTML('<h1>Hello World!</h1>')
+            .addTo(map);
+        map.on('load', () => {
+            // Insert the layer beneath any symbol layer.
+            // const layers = map.getStyle().layers;
+            // const labelLayerId = layers.find(
+            //     (layer) => layer.type === 'symbol' && layer.layout['text-field']
+            // ).id;
+
+            var layers = map.getStyle().layers;
+
+            var labelLayerId;
+            for (var i = 0; i < layers.length; i++) {
+                if (layers[i].type === 'symbol' && layers[i].layout['text-field']) {
+                    labelLayerId = layers[i].id;
+                    break;
+                }
+            }
+            // debugger
+            // The 'building' layer in the Mapbox Streets
+            // vector tileset contains building height data
+            // from OpenStreetMap.
+            // map.addLayer(
+            //     {
+            //         'id': 'add-3d-buildings',
+            //         'source': 'composite',
+            //         'source-layer': 'building',
+            //         'filter': ['==', 'extrude', 'true'],
+            //         'type': 'fill-extrusion',
+            //         'minzoom': 15,
+            //         'paint': {
+            //             'fill-extrusion-color': '#aaa',
+
+            //             // Use an 'interpolate' expression to
+            //             // add a smooth transition effect to
+            //             // the buildings as the user zooms in.
+            //             'fill-extrusion-height': [
+            //                 'interpolate',
+            //                 ['linear'],
+            //                 ['zoom'],
+            //                 15,
+            //                 0,
+            //                 15.05,
+            //                 ['get', 'height']
+            //             ],
+            //             'fill-extrusion-base': [
+            //                 'interpolate',
+            //                 ['linear'],
+            //                 ['zoom'],
+            //                 15,
+            //                 0,
+            //                 15.05,
+            //                 ['get', 'min_height']
+            //             ],
+            //             'fill-extrusion-opacity': 0.6
+            //         }
+            //     },
+            //     labelLayerId
+            // );
+            // var layers1 = map.getStyle().layers;
+            // console.log(layers1);
+
+        });
+    </script>
+
+</body>
+
+</html>
