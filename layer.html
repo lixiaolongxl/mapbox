@@ -1,0 +1,78 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Display buildings in 3D</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1IjoibHhsMTg2MTY3NjE1NzMiLCJhIjoiY2wwdGN2ZTd6MGtqMjNqcW9zYXV1eGY1byJ9.Fnj5nNbivkRLztpmRHL0MA';
+        //    属性配置
+        const map = new mapboxgl.Map({
+            style: './json/index.json', //高德地图
+            // style: 'mapbox://styles/mapbox/streets-v11',
+            center: [104, 36],
+            zoom: 12,
+            pitch: 0, //倾斜角度
+            container: 'map',
+            //如果为 true , 将开启 "拖拽旋转地图" 交互模式 (查阅 DragRotateHandler )。
+        });
+        map.on('load', () => {
+            map.addSource('places', {
+                'type': 'geojson',
+                'data': {
+                    'type': 'FeatureCollection',
+                    'features': [
+                        {
+                            'type': 'Feature',
+                            'properties': {
+                                'description':''
+                            },
+                            'geometry': {
+                                'type': 'Point',
+                                'coordinates': [104, 36]
+                            }
+                        },
+                    ]
+                }
+            })
+            map.addLayer({
+                'id': 'places',
+                'type': 'circle',
+                'source': 'places',
+                'paint': {
+                    'circle-color': '#4264fb',
+                    'circle-radius': 10,
+                    'circle-stroke-width': 2,
+                    'circle-stroke-color': '#ffffff'
+                }
+            });
+
+        })
+
+
+    </script>
+
+</body>
+
+</html>

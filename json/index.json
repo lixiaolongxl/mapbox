@@ -6,19 +6,33 @@
         "raster-tiles": {
             "type": "raster",
             "tiles": [
-                
+
                 "http://webrd01.is.autonavi.com/appmaptile?x={x}&y={y}&z={z}&lang=zh_cn&size=1&scale=1&style=7"
             ],
             "tileSize": 256
         }
     },
 
-    "layers": [{
-        "id": "raster-tiles",
-        "type": "raster",
-        "source": "raster-tiles",
-        "minzoom": 0,
-        "maxzoom": 22
-    }]
+    "layers": [
+        {
+            "id": "background",
+            "type": "background",
+            "paint":{
+                "background-color":"blue",
+                "background-opacity":1
+               
+            },
+            "layout":{
+                "visibility":"visible"
+            }
+        },
+        {
+            "id": "raster-tiles",
+            "type": "raster",
+            "source": "raster-tiles",
+            "minzoom": 0,
+            "maxzoom": 22
+        }
+    ]
 
 }
