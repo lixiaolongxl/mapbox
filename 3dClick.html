@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Display buildings in 3D</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1IjoibHhsMTg2MTY3NjE1NzMiLCJhIjoiY2wwdGN2ZTd6MGtqMjNqcW9zYXV1eGY1byJ9.Fnj5nNbivkRLztpmRHL0MA';
+        const map = new mapboxgl.Map({
+            style: 'mapbox://styles/mapbox/light-v10',
+            center: [-74.0066, 40.7135],
+            zoom: 15.5,
+            pitch: 45,
+            bearing: -17.6,
+            container: 'map',
+            antialias: true, //如果为 true ，
+            zoom: 16,
+            hash: true
+        });
+
+        map.on('load', () => {
+            // Insert the layer beneath any symbol layer.
+            const layers = map.getStyle().layers;
+            let labelLayerId;
+            for (let i = 0; i < layers.length; i++) {
+                if (layers[i].type === "symbol" && layers[i].layout["text-field"]) {
+                    labelLayerId = layers[i].id;
+                    break;
+                }
+            }
+
+            // The 'building' layer in the Mapbox Streets
+            // vector tileset contains building height data
+            // from OpenStreetMap.
+            map.addLayer(
+                {
+                    'id': '3d-buildings',
+                    'source': 'composite',
+                    'source-layer': 'building',
+                    'filter': ['==', 'extrude', 'true'],
+                    'type': 'fill-extrusion',
+                    'minzoom': 14,
+                    'paint': {
+                        // 'fill-extrusion-color': '#aaa',
+                        "fill-extrusion-color": [
+                            "match",
+                            ["feature-state", "highlight"],
+                            "true",
+                            "#F0F",
+                            "#09F"
+                        ],
+                        // Use an 'interpolate' expression to
+                        // add a smooth transition effect to
+                        // the buildings as the user zooms in.
+                        'fill-extrusion-height': [
+                            'interpolate',
+                            ['linear'],
+                            ['zoom'],
+                            15,
+                            0,
+                            15.05,
+                            ['get', 'height']
+                        ],
+                        'fill-extrusion-base': [
+                            'interpolate',
+                            ['linear'],
+                            ['zoom'],
+                            15,
+                            0,
+                            15.05,
+                            ['get', 'min_height']
+                        ],
+                        'fill-extrusion-opacity': 0.6
+                    }
+                },
+                labelLayerId
+            );
+
+            function findParent(features) {
+                const clicked = features[0];
+                if (clicked.properties.type === "building:part") {
+                    const all_features = map.queryRenderedFeatures({
+                        layers: ["3d-buildings"]
+                        // , filter: ["==", "id", clicked.properties.parent]
+                    });
+                    let parent;
+                    all_features.every(feature => {
+                        if (feature.id === clicked.properties.parent) {
+                            parent = feature;
+                            return false;
+                        } else {
+                            return true;
+                        }
+                    });
+                    return parent ? parent : clicked;
+                } else {
+                    return clicked;
+                }
+            }
+            const selectFeatures = (() => {
+                let previous;
+                return ids => {
+                    if (ids !== previous && previous !== undefined) {
+                        previous.forEach(p_id => {
+                            map.setFeatureState(
+                                {
+                                    source: "composite",
+                                    sourceLayer: "building",
+                                    id: p_id
+                                },
+                                { highlight: "false" }
+                            );
+                        });
+                    }
+                    previous = ids;
+                    
+                    ids.forEach(id => {
+                        
+                        map.setFeatureState(
+                            { source: "composite", sourceLayer: "building", id },
+                            { highlight: "true" }
+                        );
+                    });
+                };
+            })();
+
+
+            map.on("click", e => {
+                const features = map.queryRenderedFeatures(e.point, {
+                    layers: ["3d-buildings"]
+                });
+                // debugger
+                if (features) {
+                    // find the parent
+                    const parent = findParent(features);
+
+                    let ids = [parent.id];
+                    if (parent.properties.parts) {
+                        ids = ids.concat(JSON.parse(parent.properties.parts));
+                    }
+                    // debugger
+                    selectFeatures(ids);
+                }
+            });
+        });
+    </script>
+
+</body>
+
+</html>

@@ -30,7 +30,7 @@
         const map = new mapboxgl.Map({
             // style: './json/index.json', //高德地图
             style: 'mapbox://styles/mapbox/streets-v11',
-            center: [-68.137343, 45.137451],
+            center: [121.226754, 31.217698],
             zoom: 12,
             pitch: 0, //倾斜角度
             container: 'map',
@@ -66,22 +66,76 @@
                     'circle-stroke-color': '#ffffff'
                 }
             });
+           
+           
             map.addSource('ploygon', {
                 'type': 'geojson',
                 'data': {
                     'type': 'Feature',
                     'geometry': {
-                        'type': 'Polygon',
+                        'type': 'MultiPolygon',
                         'coordinates': [
-                            [
-                                [-67.13734, 45.13745],
-                                [-66.96466, 44.8097],
-                                [-68.03252, 44.3252],
-                                [-69.06, 43.98],
-                                [-67.13734, 45.13745],
-                               
-                            ]
 
+                        [
+                                [
+                                    [
+                                        121.226754,
+                                        31.217698
+                                    ],
+                                    [
+                                        121.278521,
+                                        31.201282
+                                    ],
+                                    [
+                                        121.272704,
+                                        31.163463
+                                    ],
+                                    [
+                                        121.227918,
+                                        31.153011
+                                    ],
+                                    [
+                                        121.197672,
+                                        31.186355
+                                    ],
+                                    [
+                                        121.226754,
+                                        31.217698
+                                    ]
+                                ]
+                            ],
+
+
+                            [
+                                [
+                                    [
+                                        121.216866,
+                                        31.178393
+                                    ],
+                                    [
+                                        121.259326,
+                                        31.165454
+                                    ],
+                                    [
+                                        121.252928,
+                                        31.125132
+                                    ],
+                                    [
+                                        121.205815,
+                                        31.119655
+                                    ],
+                                    [
+                                        121.186621,
+                                        31.152015
+                                    ],
+                                    [
+                                        121.216866,
+                                        31.178393
+                                    ]
+                                ]
+                            ],
+
+                           
                         ]
                     }
                 }
@@ -95,36 +149,15 @@
                 'paint': {
                     'fill-color': '#0080ff', // blue color fill
                     'fill-opacity': 0.5,
-                    'fill-outline-color': 'green',
+                    'fill-translate-anchor': 'viewport',
+                    'fill-translate': [10, 10]
+                    // 'fill-outline-color': 'green',
 
                 }
             });
-            // 加线
-            map.addLayer({
-                'id': 'outline',
-                'type': 'line',
-                'source': 'ploygon',
-                'layout': {
-                    'line-join':'round' //线连接方式
-                },
-                'paint': {
-                    'line-color': 'green',
-                    'line-width': 3,
-                    'line-blur':0, //线条的模糊度
-                    // 'line-cap':'square' ,
-                    'line-gap-width':1,
-                    'line-offset':-10
-                    
-                }
-            });
-            // map.addSource('states', {
-            //     'type': 'geojson',
-            //     'data': {
-            //         'type': 'FeatureCollection',
-            //         'features': 
-            //     }
-            // })
-            
+       
+       
+       
         })
 
 
