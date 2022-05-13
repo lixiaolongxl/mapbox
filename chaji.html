@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        function difference(arr1, arr2) {
+            let arr3 = arr2.filter(v => {
+                return arr1.every(e => e.userId != v.userId);
+            });
+            return arr3
+        }
+
+        let arr1 =[{userId:1,a:1},{userId:2,a:3},{userId:3,a:5}]
+        let arr2 =[{userId:1,a:1},{userId:2,a:3},{userId:3,a:5},{userId:4,a:7}]
+       console.log(difference(arr2,arr1));
+       
+    </script>
+</body>
+
+</html>

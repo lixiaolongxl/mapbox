@@ -11,7 +11,13 @@
 
         System.out.println("H3索引Long类型：" + h3.geoToH3(lat, lng, res));
         //查找索引的质心,参数为H3索引类型支持Long和String
-
+let lever = 0
+					if(this.zoomstartLever<10){
+						lever = parseInt((this.zoomensdLever - 10)/2)
+					}else {
+						lever = parseInt((this.zoomendLever - this.zoomstartLever)/2)
+					}
+					console.log(lever)
 
         System.out.println("H3索引质心,经纬度坐标类型：" + h3.h3ToGeo(604336771131506687L));
         //H3地址转换为经纬度,参数为H3索引类型支持Long和String

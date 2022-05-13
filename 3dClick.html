@@ -7,6 +7,7 @@
     <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
     <link href="https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.css" rel="stylesheet">
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/h3-js/3.7.2/h3-js.js"></script>
     <style>
         body {
             margin: 0;
@@ -35,11 +36,22 @@
             container: 'map',
             antialias: true, //如果为 true ，
             zoom: 16,
-            hash: true
+            // hash: true
         });
-
+        function rotateCamera(timestamp) {
+            // clamp the rotation between 0 -360 degrees
+            // Divide timestamp by 100 to slow rotation to ~10 degrees / sec
+            map.rotateTo((timestamp / 100) % 360, { duration: 0 });
+            // Request the next frame of the animation.
+            requestAnimationFrame(rotateCamera);
+        }
+        map.on('zoomend',(e)=>{
+            console.log(e.target.getCenter());
+            
+        })
         map.on('load', () => {
             // Insert the layer beneath any symbol layer.
+            // rotateCamera(0);
             const layers = map.getStyle().layers;
             let labelLayerId;
             for (let i = 0; i < layers.length; i++) {
@@ -133,9 +145,9 @@
                         });
                     }
                     previous = ids;
-                    
+
                     ids.forEach(id => {
-                        
+
                         map.setFeatureState(
                             { source: "composite", sourceLayer: "building", id },
                             { highlight: "true" }

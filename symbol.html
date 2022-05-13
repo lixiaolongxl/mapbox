@@ -46,19 +46,11 @@
                     'geometry': {
                         'type': 'MultiPoint',
                         'coordinates': [
-                            
-                                [-67.13734, 45.13745],
-                                [-66.96466, 44.8097],
-                                [-68.03252, 44.3252],
-                                [-69.06, 43.98],
-                                [-67.13734, 45.13745],
-                               
-                            
-
+                            [-67.13734, 45.13745]
                         ]
                     },
                     'properties':{
-                        name:'测试文字'
+                        name:'测试文字2'
                     }
                 }
             })
@@ -68,10 +60,10 @@
                 'type': 'symbol',
                 'source': 'ploygon',
                 'layout':{
-                    'icon-image':'airfield-11',
-                    'icon-size':2,
+                    // 'icon-image':'airfield-11',
+                    // 'icon-size':2,
                     // 'icon-color':'red',
-                    'icon-offset':[0,-16],
+                    // 'icon-offset':[0,-16],
                     // 'icon-allow-overlap':false,
                     'text-field':'{name}',
                     'text-size':16,
@@ -83,19 +75,19 @@
                     'text-color':'blue'
                 }
             });
-            map.addLayer({
-                'id': 'outline',
-                'type': 'line',
-                'source': 'ploygon',
-                // 'layout': {
-                //     'line-join':'round' //线连接方式
-                // },
-                'paint': {
-                    'line-color': 'green',
-                    'line-width': 3,
+            // map.addLayer({
+            //     'id': 'outline',
+            //     'type': 'line',
+            //     'source': 'ploygon',
+            //     // 'layout': {
+            //     //     'line-join':'round' //线连接方式
+            //     // },
+            //     'paint': {
+            //         'line-color': 'green',
+            //         'line-width': 3,
                     
-                }
-            });
+            //     }
+            // });
         })
 
 
