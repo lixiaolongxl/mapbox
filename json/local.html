@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>local</title>
+		<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+		<link href="https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.css" rel="stylesheet">
+		<script src="https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.js"></script>
+		<script type="text/javascript" src="https://unpkg.com/@dcloudio/uni-webview-js@0.0.1/index.js"></script>
+		<style>
+			body {
+				margin: 0;
+				padding: 0;
+			}
+
+
+
+			#map {
+				position: absolute;
+				top: 0;
+				bottom: 0;
+				width: 100%;
+				overflow: hidden;
+			}
+
+			.container {
+				background: #F6F6F6;
+			}
+
+			.mapboxgl-ctrl-bottom-left {
+				display: none !important
+			}
+
+			.mapboxgl-ctrl-bottom-right .mapboxgl-compact {
+				display: none !important
+			}
+		</style>
+
+	</head>
+	<body id="unity-container">
+		<div id="map"></div>
+		<script>
+			document.addEventListener('UniAppJSBridgeReady', function() {
+				var container = document.querySelector("#unity-container");
+				container.onclick = () => {
+					uni.postMessage({
+						data: {
+							action: false,
+							type:'local'
+						}
+					});
+				}
+			});
+		</script>
+		<script>
+			var map
+			mapboxgl.accessToken =
+				'pk.eyJ1IjoibHhsMTg2MTY3NjE1NzMiLCJhIjoiY2wwdGN2ZTd6MGtqMjNqcW9zYXV1eGY1byJ9.Fnj5nNbivkRLztpmRHL0MA';
+			navigator.geolocation.getCurrentPosition((position) => {
+				map = new mapboxgl.Map({
+					style: 'mapbox://styles/wujiajun/cl18pek8k005b14o35i1tp61b',
+					zoom: 15,
+					center: [position.coords.longitude, position.coords.latitude],
+					pitch: 70.5,
+					trackResize: true,
+					antialias: true,
+					container: 'map'
+				});
+				map.on('load', () => {
+					var timer = navigator.geolocation.watchPosition((position) => {
+						map.setCenter([position.coords.longitude, position.coords
+							.latitude
+						])
+
+						addLacalPoint(map, 'localpoint2024', [position.coords
+							.longitude, position.coords.latitude
+						], '#6DD400')
+
+					}, (err) => {
+						navigator.geolocation.clearWatch(timer);
+					}, {
+						enableHighAccuracy: true,
+						maximumAge: 2000
+					});
+				})
+			}, (err) => {}, {
+				enableHighAccuracy: true,
+				maximumAge: 2000
+			});
+
+			function addLacalPoint(map, uuid, arr, color) {
+				let source = map.getSource(uuid);
+				if (source) {
+					source.setData({
+						"type": "Point",
+						"coordinates": arr
+					});
+				} else {
+					map.addSource(uuid, {
+						'type': 'geojson',
+						'data': {
+							'type': 'FeatureCollection',
+							'features': [{
+								'type': 'Feature',
+								'geometry': {
+									'type': 'Point',
+									'coordinates': arr
+								}
+							}]
+						}
+					});
+					if (!map.getLayer(uuid)) {
+						map.addLayer({
+							'id': uuid,
+							'type': 'circle',
+							'source': uuid,
+							'paint': {
+								'circle-color': color,
+								'circle-radius': 6,
+								'circle-stroke-width': 2,
+								'circle-stroke-color': '#ffffff'
+							}
+						});
+					}
+				}
+
+			}
+		</script>
+	</body>
+</html>
